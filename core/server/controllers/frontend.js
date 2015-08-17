@@ -285,13 +285,26 @@ frontendControllers = {
             var permalink = response.settings[0],
                 editFormat,
                 postLookup,
-                match;
+                match,
+                permalinkValue;
 
             editFormat = permalink.value[permalink.value.length - 1] === '/' ? ':edit?' : '/:edit?';
+            // Keep track of permalinkValue to check both url patterns when searching for post
+            permalinkValue = permalink.value;
 
             // Convert saved permalink into a path-match function
             permalink = routeMatch(permalink.value + editFormat);
             match = permalink(path);
+
+            // Check both url patterns: /:slug/ and /:year/:month/:day/:slug/
+            if (match === false) {
+                permalinkValue = permalinkValue == '/:slug/' ?
+                  '/:year/:month/:day/:slug/' :
+                  '/:slug/';
+                // Convert saved permalink into a path-match function
+                permalink = routeMatch(permalinkValue + editFormat);
+                match = permalink(path);
+            }
 
             // Check if the path matches the permalink structure.
             //
